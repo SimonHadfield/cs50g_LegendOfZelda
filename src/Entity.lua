@@ -29,6 +29,8 @@ function Entity:init(def)
 
     self.health = def.health
 
+    self.heart_drop = def.heart_drop or 1
+
     -- flags for flashing the entity when hit
     self.invulnerable = false
     self.invulnerableDuration = 0
@@ -38,6 +40,7 @@ function Entity:init(def)
     self.flashTimer = 0
 
     self.dead = false
+    self.heart_released = false
 end
 
 function Entity:createAnimations(animations)
@@ -64,6 +67,16 @@ end
 
 function Entity:damage(dmg)
     self.health = self.health - dmg
+end
+
+function Entity:heal()
+    if self.health < 6 then
+        self.health = self.health + 2
+    end
+    -- for case that play is only half heart below full health and heals full heart
+    if self.health > 6 then
+        self.health = 6
+    end
 end
 
 function Entity:goInvulnerable(duration)

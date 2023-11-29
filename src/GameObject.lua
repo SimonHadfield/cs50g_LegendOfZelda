@@ -33,6 +33,7 @@ function GameObject:init(def, x, y)
     self.onCollide = function() end
 
     self.onConsume = function() end
+
 end
 
 function GameObject:update(dt)

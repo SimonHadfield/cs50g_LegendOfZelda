@@ -33,6 +33,9 @@ function Room:init(player)
     -- reference to player for collisions, etc.
     self.player = player
 
+    -- dropped hearts
+    self.hearts =  {}
+
     -- used for centering the dungeon rendering
     self.renderOffsetX = MAP_RENDER_OFFSET_X
     self.renderOffsetY = MAP_RENDER_OFFSET_Y
@@ -47,7 +50,7 @@ end
 ]]
 function Room:generateEntities()
     local types = {'skeleton', 'slime', 'bat', 'ghost', 'spider'}
-
+    local heart_drop = math.random(5) -- determines whether they drop a heart
     for i = 1, 10 do
         local type = types[math.random(#types)]
 
@@ -64,7 +67,9 @@ function Room:generateEntities()
             width = 16,
             height = 16,
 
-            health = 1
+            health = 1,
+
+            heart_drop = math.random(5) -- determines whether they drop a heart
         })
 
         self.entities[i].stateMachine = StateMachine {
@@ -87,6 +92,21 @@ function Room:generateObjects()
         math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
                     VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
     )
+
+    local pot  = GameObject (
+
+    --GAME_OBJECT_DEFS['pots'],
+
+    GAME_OBJECT_DEFS['switch'],
+    math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
+            VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
+    math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
+            VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
+    )
+
+    for i = 1, 3 do
+        table.insert(self.objects, pot)
+    end
 
     -- define a function for the switch that will open all doors in the room
     switch.onCollide = function()
@@ -153,20 +173,22 @@ function Room:update(dt)
 
     self.player:update(dt)
 
-    print("health: ", self.player.health)
+    local heart_random = math.random(50)
 
     for i = #self.entities, 1, -1 do
         local entity = self.entities[i]
-
         -- remove entity from the table if health is <= 0
         if entity.health <= 0 then
             entity.dead = true
-            if math.random(3) == 1 then
-                -- drop heart
-                if self.player.health < 6 then
-                    print("health increased by 1")
-                    self.player:damage(-1)
-                end
+            print(entity.heart_drop)
+            if not entity.heart_released and entity.heart_drop == 1 then
+                entity.heart_released = true -- prevent multiple hearts for given entity
+                table.insert(self.hearts, Heart {
+                    x = entity.x, 
+                    y = entity.y
+                })
+                
+                
             end
         elseif not entity.dead then
             entity:processAI({room = self}, dt)
@@ -176,13 +198,29 @@ function Room:update(dt)
         -- collision between the player and entities in the room
         if not entity.dead and self.player:collides(entity) and not self.player.invulnerable then
             gSounds['hit-player']:play()
-            print("Player health decreased by 1")
-            self.player:damage(2) -- 1
+            self.player:damage(1) 
             self.player:goInvulnerable(1.5)
 
             if self.player.health == 0 then
                 gStateMachine:change('game-over')
             end
+        end
+
+    end
+
+    for k, heart in pairs(self.hearts) do
+        heart:update(dt)
+
+        if self.player:collides(heart) then
+            table.remove(self.hearts, k)
+            self.player:heal()
+            
+            -- play heal sound (combination of two other sounds)
+            gSounds['hit-player']:play()
+            gSounds['hit-enemy']:play()
+        end
+        if heart.timer > 4 then
+            table.remove(self.hearts, k)
         end
     end
 
@@ -204,6 +242,10 @@ function Room:render()
                 (x - 1) * TILE_SIZE + self.renderOffsetX + self.adjacentOffsetX, 
                 (y - 1) * TILE_SIZE + self.renderOffsetY + self.adjacentOffsetY)
         end
+    end
+
+    for k, object in pairs(self.hearts) do
+        object:render()
     end
 
     -- render doorways; stencils are placed where the arches are after so the player can

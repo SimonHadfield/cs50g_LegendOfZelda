@@ -97,16 +97,14 @@ function Room:generateObjects()
 
     --GAME_OBJECT_DEFS['pots'],
 
-    GAME_OBJECT_DEFS['switch'],
+    GAME_OBJECT_DEFS['pot'],
     math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
             VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
     math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
             VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
     )
-
-    for i = 1, 3 do
-        table.insert(self.objects, pot)
-    end
+    
+    table.insert(self.objects, pot)
 
     -- define a function for the switch that will open all doors in the room
     switch.onCollide = function()
@@ -120,6 +118,34 @@ function Room:generateObjects()
 
             gSounds['door']:play()
         end
+    end
+
+    pot.onCollide = function()
+        -- create variable that accessed by player to see if you can lift the pot or not
+        self.player.potCollide = true
+    end
+
+    pot.onLift = function()
+        pot.x = self.player.x - 1
+        pot.y = self.player.y - 5
+    end
+
+    pot.onThrow = function(dt)
+        if self.player.direction == 'down' then
+            pot.y = 10 -- pot.y + pot.dy
+        end
+        if self.player.direction == 'up' then
+            pot.y = pot.y - pot.dy * dt
+        end
+        if self.player.direction == 'left' then
+            pot.x = pot.x - pot.dx
+        end
+        if self.player.direction == 'right' then
+            pot.x = pot.x + pot.dx
+        end
+
+        -- for when pot collides with wall -------------------------------------------------------------------
+        --
     end
 
     -- add to list of objects in scene (only one switch for now)
@@ -173,6 +199,9 @@ function Room:update(dt)
 
     self.player:update(dt)
 
+    
+    self.player.potCollide = false -- reset if player not touching pot
+
     local heart_random = math.random(50)
 
     for i = #self.entities, 1, -1 do
@@ -180,7 +209,6 @@ function Room:update(dt)
         -- remove entity from the table if health is <= 0
         if entity.health <= 0 then
             entity.dead = true
-            print(entity.heart_drop)
             if not entity.heart_released and entity.heart_drop == 1 then
                 entity.heart_released = true -- prevent multiple hearts for given entity
                 table.insert(self.hearts, Heart {
@@ -230,6 +258,17 @@ function Room:update(dt)
         -- trigger collision callback on object
         if self.player:collides(object) then
             object:onCollide()
+        end
+
+        
+        if object.type == 'pot' then
+            if self.player.potLifted == true then
+                object:onLift()
+            end
+            if self.player.potThrow == true then
+                print(self.player.potThrow)
+                object:onThrow(dt)
+            end
         end
     end
 end
@@ -286,6 +325,15 @@ function Room:render()
     
     if self.player then
         self.player:render()
+    end
+
+    -- if pot lifted render pot infront of player
+    if self.player.potLifted == true then
+        for k, object in pairs(self.objects) do
+            if object.type == 'pot' then
+                object:render(self.adjacentOffsetX, self.adjacentOffsetY)
+            end
+        end
     end
 
     love.graphics.setStencilTest()

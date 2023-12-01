@@ -23,16 +23,27 @@ function GameObject:init(def, x, y)
     self.state = self.defaultState
     self.states = def.states
 
+    self.paired = false
+    self.thrown = false
+
     -- dimensions
     self.x = x
     self.y = y
     self.width = def.width
     self.height = def.height
 
+    -- change in pos
+    self.dx = 2
+    self.dy = 2
+
     -- default empty collision callback
     self.onCollide = function() end
 
     self.onConsume = function() end
+
+    self.onThrow = function() end
+
+    self.onLift = function() end
 
 end
 

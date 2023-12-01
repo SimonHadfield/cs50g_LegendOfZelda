@@ -29,7 +29,7 @@ function love.load()
     gStateMachine:change('start')
 
     gSounds['music']:setLooping(true)
-    gSounds['music']:play(0.3)
+    --gSounds['music']:play(0.01)
 
     love.keyboard.keysPressed = {}
 end

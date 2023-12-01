@@ -38,6 +38,16 @@ function PlayerWalkState:update(dt)
         self.entity:changeState('swing-sword')
     end
 
+    if love.keyboard.wasPressed('e') and self.entity.potCollide == true and self.entity.potLifted == false then
+        self.entity:changeState('pot-lift')
+        self.entity.potLifted = true
+    end
+
+    if love.keyboard.wasPressed('e') and self.entity.potLifted == true then
+        self.entity:changeState('idle')
+        self.entity.potThrow = true
+    end
+
     -- perform base collision detection against walls
     EntityWalkState.update(self, dt)
 

@@ -41,6 +41,11 @@ function Entity:init(def)
 
     self.dead = false
     self.heart_released = false
+
+    -- player collided with pot
+    self.potCollide = false
+    self.potLifted = false
+    self.potThrow = false
 end
 
 function Entity:createAnimations(animations)

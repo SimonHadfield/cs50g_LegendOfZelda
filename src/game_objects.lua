@@ -31,12 +31,12 @@ GAME_OBJECT_DEFS = {
         width = 16,
         height = 16,
         solid = true,
-        defaultState = 'floor',
+        defaultState = 'pot1',
         states = {
-            ['floor'] = {
+            ['pot1'] = {
                 frame = 110
             },
-            ['pickedUp'] = {
+            ['pot2'] = {
                 frame = 111
             }
         }

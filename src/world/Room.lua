@@ -95,7 +95,6 @@ function Room:generateObjects()
 
     local pot  = GameObject (
 
-    --GAME_OBJECT_DEFS['pots'],
 
     GAME_OBJECT_DEFS['pot'],
     math.random(MAP_RENDER_OFFSET_X + TILE_SIZE,
@@ -103,6 +102,8 @@ function Room:generateObjects()
     math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
             VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
     )
+
+    pot:passPlayer(self.player)
     
     table.insert(self.objects, pot)
 
@@ -130,12 +131,12 @@ function Room:generateObjects()
         pot.y = self.player.y - 5
     end
 
-    pot.onThrow = function(dt)
+    pot.onThrow = function()
         if self.player.direction == 'down' then
-            pot.y = 10 -- pot.y + pot.dy
+            pot.y = pot.y + pot.dy
         end
         if self.player.direction == 'up' then
-            pot.y = pot.y - pot.dy * dt
+            pot.y = pot.y - pot.dy
         end
         if self.player.direction == 'left' then
             pot.x = pot.x - pot.dx
@@ -266,8 +267,28 @@ function Room:update(dt)
                 object:onLift()
             end
             if self.player.potThrow == true then
+                self.player.potLifted = false -- break pairing to player position
                 print(self.player.potThrow)
-                object:onThrow(dt)
+                object:onThrow()
+
+                print('y: ', object.y)
+                object.thrown = true
+
+                -- change logic (object will change path if player changes direction mid throw)
+                if self.player.direction == 'down' then
+                    object.y = object.y + object.dy * dt
+                end
+                if self.player.direction == 'up' then
+                    object.y = object.y - object.dy * dt
+                end
+                if self.player.direction == 'left' then
+                    object.x = object.x - object.dx * dt
+                end
+                if self.player.direction == 'right' then
+                    object.x = object.x + object.dx * dt
+                end
+
+                -- exit loop if collision with wall or entity
             end
         end
     end

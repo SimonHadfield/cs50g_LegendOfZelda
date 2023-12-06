@@ -30,7 +30,7 @@ function PlayerIdleState:update(dt)
         self.entity.potLifted = true
     end
 
-    if love.keyboard.wasPressed('e') and self.entity.potLifted == true then
+    if love.keyboard.wasPressed('f') and self.entity.potLifted == true then
         self.entity:changeState('idle')
         self.entity.potThrow = true
     end

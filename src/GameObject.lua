@@ -23,6 +23,8 @@ function GameObject:init(def, x, y)
     self.state = self.defaultState
     self.states = def.states
 
+    --self.player = nil
+
     self.paired = false
     self.thrown = false
 
@@ -33,8 +35,10 @@ function GameObject:init(def, x, y)
     self.height = def.height
 
     -- change in pos
-    self.dx = 2
-    self.dy = 2
+    self.dx = 0.5
+    self.dy = 0.5
+
+    self.thrown = false
 
     -- default empty collision callback
     self.onCollide = function() end
@@ -47,8 +51,17 @@ function GameObject:init(def, x, y)
 
 end
 
-function GameObject:update(dt)
+function GameObject:passPlayer(player)
+    self.player = player
+end
 
+function GameObject:update(dt)
+    if not(player == nil) then
+        print('player direction: ', self.player.direction)
+        if (self.thrown == true) then
+            --self.x = self.x + self.dx * dt
+        end
+    end
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)

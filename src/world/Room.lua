@@ -128,7 +128,7 @@ function Room:generateObjects()
 
     pot.onLift = function()
         pot.x = self.player.x - 1
-        pot.y = self.player.y - 5
+        pot.y = self.player.y - 6
     end
 
     pot.onThrow = function()

@@ -6,9 +6,9 @@
     cogden@cs50.harvard.edu
 ]]
 
-PlayerWalkState = Class{__includes = EntityWalkState}
+PlayerPotWalkState = Class{__includes = EntityWalkState}
 
-function PlayerWalkState:init(player, dungeon)
+function PlayerPotWalkState:init(player, dungeon)
     self.entity = player
     self.dungeon = dungeon
 
@@ -17,36 +17,30 @@ function PlayerWalkState:init(player, dungeon)
     self.entity.offsetX = 0
 end
 
-function PlayerWalkState:update(dt)
+function PlayerPotWalkState:update(dt)
     if love.keyboard.isDown('left') then
         self.entity.direction = 'left'
-        self.entity:changeAnimation('walk-left')
+        self.entity:changeAnimation('pot-walk-left')
     elseif love.keyboard.isDown('right') then
         self.entity.direction = 'right'
-        self.entity:changeAnimation('walk-right')
+        self.entity:changeAnimation('pot-walk-right')
     elseif love.keyboard.isDown('up') then
         self.entity.direction = 'up'
-        self.entity:changeAnimation('walk-up')
+        self.entity:changeAnimation('pot-walk-up')
     elseif love.keyboard.isDown('down') then
         self.entity.direction = 'down'
-        self.entity:changeAnimation('walk-down')
+        self.entity:changeAnimation('pot-walk-down')
     else
-        self.entity:changeState('idle')
+        self.entity:changeState('pot-idle')
     end
 
-    if love.keyboard.wasPressed('space') then
-        self.entity:changeState('swing-sword')
-    end
+    -- no sword swing state
 
     if love.keyboard.wasPressed('e') and self.entity.potCollide == true and self.entity.potLifted == false then
         self.entity:changeState('pot-lift')
         self.entity.potLifted = true
     end
 
-    if self.entity.potLifted == true then
-        self.entity:changeState('pot-idle')
-        self.entity:changeState('pot-walk')
-    end
 
     if love.keyboard.wasPressed('f') and self.entity.potLifted == true then
         self.entity:changeState('idle')

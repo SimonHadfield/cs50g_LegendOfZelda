@@ -38,7 +38,7 @@ function PlayerWalkState:update(dt)
         self.entity:changeState('swing-sword')
     end
 
-    if love.keyboard.wasPressed('e') and self.entity.potCollide == true and self.entity.potLifted == false then
+    if love.keyboard.wasPressed('e') and self.entity.potCollide == true and self.entity.potLifted == false and self.entity.potThrow == false then
         self.entity:changeState('pot-lift')
         self.entity.potLifted = true
     end

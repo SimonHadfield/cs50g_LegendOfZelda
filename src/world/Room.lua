@@ -43,6 +43,8 @@ function Room:init(player)
     -- used for drawing when this room is the next room, adjacent to the active
     self.adjacentOffsetX = 0
     self.adjacentOffsetY = 0
+
+    local potThrowDirection = ""
 end
 
 --[[
@@ -132,18 +134,7 @@ function Room:generateObjects()
     end
 
     pot.onThrow = function()
-        if self.player.direction == 'down' then
-            pot.y = pot.y + pot.dy
-        end
-        if self.player.direction == 'up' then
-            pot.y = pot.y - pot.dy
-        end
-        if self.player.direction == 'left' then
-            pot.x = pot.x - pot.dx
-        end
-        if self.player.direction == 'right' then
-            pot.x = pot.x + pot.dx
-        end
+    
 
         -- for when pot collides with wall -------------------------------------------------------------------
         --
@@ -235,6 +226,17 @@ function Room:update(dt)
             end
         end
 
+        -- collision between entities and thrown pot
+        for k, object in pairs(self.objects) do
+            if object.type == 'pot' then
+                if not entity.dead and object.thrown and entity:collides(object) then
+                    gSounds['hit-enemy']:play()
+                    entity:damage(1)
+                    object.thrown = false
+                    self.player.potThrow = false
+                end
+            end
+        end
     end
 
     for k, heart in pairs(self.hearts) do
@@ -271,24 +273,43 @@ function Room:update(dt)
                 print(self.player.potThrow)
                 object:onThrow()
 
+
                 print('y: ', object.y)
-                object.thrown = true
+                
+                if self.player.direction == 'down' and object.thrown == false then
+                    object.throwDirection = 'down'
+                    object.thrown = true
+                end
+                if self.player.direction == 'up' and object.thrown == false then
+                    object.throwDirection = 'up'
+                    object.thrown = true
+                end
+                if self.player.direction == 'left' and object.thrown == false then
+                    object.throwDirection = 'left'
+                    object.thrown = true
+                end
+                if self.player.direction == 'right' and object.thrown == false then
+                    object.throwDirection = 'right'
+                    object.thrown = true
+                end
 
-                -- change logic (object will change path if player changes direction mid throw)
-                if self.player.direction == 'down' then
-                    object.y = object.y + object.dy * dt
-                end
-                if self.player.direction == 'up' then
-                    object.y = object.y - object.dy * dt
-                end
-                if self.player.direction == 'left' then
-                    object.x = object.x - object.dx * dt
-                end
-                if self.player.direction == 'right' then
-                    object.x = object.x + object.dx * dt
+                if object.thrown == true then
+                    if object.throwDirection == 'down' then
+                        object.y = object.y + object.dy * dt
+                    end
+                    if object.throwDirection == 'up' then
+                        object.y = object.y - object.dy * dt
+                    end
+                    if object.throwDirection == 'left' then
+                        object.x = object.x - object.dx * dt
+                    end
+                    if object.throwDirection == 'right' then
+                        object.x = object.x + object.dx * dt
+                    end
                 end
 
-                -- exit loop if collision with wall or entity
+                -- exit loop if collide with wall
+                
             end
         end
     end

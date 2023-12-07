@@ -35,10 +35,11 @@ function GameObject:init(def, x, y)
     self.height = def.height
 
     -- change in pos
-    self.dx = 0.5
-    self.dy = 0.5
+    self.dx = 20
+    self.dy = 20
 
     self.thrown = false
+    self.thrownDirection = ''
 
     -- default empty collision callback
     self.onCollide = function() end
